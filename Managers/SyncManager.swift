@@ -1,5 +1,5 @@
 //
-//  SyncHandler.swift
+//  SyncManager.swift
 //  
 
 import Foundation
