@@ -44,15 +44,9 @@ A query subcription wrapper class. It gives us a handy API like:
 
 ```
 let query = SyncQuery<User>(query: { $0.filter("username = 'john'") })
-```
-
-And then you can just:
-
-```
 query.sync()
 
-// OR
-
+// Or
 query.sync(notify: .indefinetly) { [weak self] result in
     guard let self = self else { return }
     switch result {
@@ -61,11 +55,8 @@ query.sync(notify: .indefinetly) { [weak self] result in
     case .failed: print("error")
     }
 }
-```
 
-and to unsubscribe:
-
-```
+// to unsubscribe
 query.unsync()
 ```
 
