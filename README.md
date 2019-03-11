@@ -1,6 +1,7 @@
 # Realm Sync Helper Classes
 Set of simple classes to make life easier with Realm Sync.
-This is just a quick weekend prototype/proof of concept and is **WORK IN PROGRESS**! 
+
+IMPORTANT: this is just a quick weekend prototype/proof of concept and is **WORK IN PROGRESS**! 
 
 ## Revelant Classes
 
@@ -34,12 +35,12 @@ query.sync(query: { $0.filter("username CONTAINS '\(text)'") }, notify: .oneTime
 }
 ```
 
-The class unsyncs the queries automatically when doing a new query over the same `query` object, or when disposing the class. It also buffers the last used query so results don't disappear before next response arrives.
+The class unsyncs the queries automatically when doing a new query over the same `query` object, or on the `deinit` of the class. It also buffers the last used query so results don't disappear before next response arrives.
 
 In case the app crashes or closes before unsyncing these subscriptions, on launch we call `SyncManager.shared.purgeDisposableQueries()` and unsubscribes all pending disposable subscriptions.
 
 ### SyncQuery
-Class that represents a subcription. It gives us a handy API like:
+A query subcription wrapper class. It gives us a handy API like:
 
 ```
 let query = SyncQuery<User>(query: { $0.filter("username = 'john'") })
@@ -62,20 +63,14 @@ query.sync(notify: .indefinetly) { [weak self] result in
 }
 ```
 
-and then you can do:
+and to unsubscribe:
 
 ```
 query.unsync()
 ```
 
-### RealmManager
-Just a helper class to login/logout and other realm related basic stuff.
-
-### ConnectivityManager
-To know if we have network connection and listen changes (using AlamoFire).
-
 ## Example
 
-In the example, we do a user search using a `DisposableSyncQuery`. We also change the Status Bar color depending on the `syncStatus`: clear for `synced`, yellow for `syncing` and red when `notSynced`. Please refer to the attached gif.
+In the example, we do a user search using a `DisposableSyncQuery`. We also change the Status Bar color depending on the `syncStatus`: clear for `synced`, yellow for `syncing` and red when `notSynced`. Please refer to the attached gif:
 
-
+![](example.gif)
