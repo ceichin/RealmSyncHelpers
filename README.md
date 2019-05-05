@@ -1,7 +1,7 @@
 # Realm Sync Helper Classes
 Set of simple classes to make life easier with Realm Sync.
 
-IMPORTANT: this is just a quick weekend prototype/proof of concept and is **WORK IN PROGRESS**! 
+IMPORTANT: this is just a proof of concept and is WORK IN PROGRESS! 
 
 ## Revelant Classes
 
@@ -11,14 +11,14 @@ Help us to know if realm is:
 * `syncing`: Syncying.
 * `notSynced`: Some change have not been synced, or there is no connection (we don't know if server changed).
 
-We can listen the changes of this status or just use the flag `isEverythingSynced`.
+We can listen to the changes of this status, or just use the flag `isEverythingSynced`.
 
 ### DisposableSyncQuery
 Allows you to create a "temporal/disposable subscription" in a safe way. 
 
 For example, you want to do a search by user while the user is typing. This is not trivial because: 
 1. You need to subscribe to a query and wait
-2. You need to listen if something goes wrong
+2. You need to listen when it completes, and if something goes wrong
 3. You have to be sure to unsubscribe the subscriptions, or they will be hanging forever
 
 Using `DisposableSyncQuery` you can just:

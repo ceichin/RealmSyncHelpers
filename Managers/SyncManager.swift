@@ -42,7 +42,7 @@ class SyncManager {
         subscriptions.forEach {
             if let name = $0.name, name.hasPrefix(SyncQueryConstants.disposableSubscriptionNamePrefix) {
                 $0.unsubscribe()
-                print("SyncQuery \"\(name)\" has been purged.")
+                Log.debug(message: "SyncQuery \"\(name)\" has been purged.")
             }
         }
     }
@@ -53,7 +53,7 @@ extension SyncManager {
     fileprivate func subscribeToConnectionState() {
         connectionListener = ConnectivityManager.shared.status.asObservable().subscribe(onNext: { [weak self] status in
             guard let self = self else { return }
-            Log.debug(message: "SyncManager - Is reachable: \"\(self.isReachable)\"")
+            //Log.debug(message: "SyncManager - Is reachable: \"\(self.isReachable)\"")
             self.updateSyncedFlag()
         })
     }
@@ -61,8 +61,12 @@ extension SyncManager {
     fileprivate func subscribeToSessionConnectionState() {
         sessionNotificationToken = session?.observe(\.connectionState) { [weak self] session, change in
             guard let self = self else { return }
-            Log.debug(message: "SyncManager - Realm connection state connected: \"\(self.isSessionConnected)\"")
-            self.updateSyncedFlag()
+            //Log.debug(message: "SyncManager - Realm connection state connected: \"\(self.isSessionConnected)\"")
+            
+            // In another thread to avoid deadlock on logout
+            DispatchQueue.global(qos: .background).async {
+                self.updateSyncedFlag()
+            }
         }
     }
     
@@ -70,7 +74,7 @@ extension SyncManager {
         uploadProgressToken = session?.addProgressNotification(for: .upload, mode: .reportIndefinitely) { [weak self] progress in
             guard let self = self else { return }
             self.isUploadTransferComplete = progress.isTransferComplete
-            Log.debug(message: "SyncManager - Is donwload complete?: \"\(self.isUploadTransferComplete)\"")
+            //Log.debug(message: "SyncManager - Is donwload complete?: \"\(self.isUploadTransferComplete)\"")
             self.updateSyncedFlag()
         }
     }
@@ -79,7 +83,7 @@ extension SyncManager {
         downloadProgressToken = session?.addProgressNotification(for: .download, mode: .reportIndefinitely) { [weak self] progress in
             guard let self = self else { return }
             self.isDownloadTransferComplete = progress.isTransferComplete
-            Log.debug(message: "SyncManager - Is upload complete?: \"\(self.isDownloadTransferComplete)\"")
+            //Log.debug(message: "SyncManager - Is upload complete?: \"\(self.isDownloadTransferComplete)\"")
             self.updateSyncedFlag()
         }
     }
@@ -98,8 +102,8 @@ extension SyncManager {
             StatusBar.backgroundColor = .red
             syncStatus.value = .notSynced
         }
-
+        
         isEverythingSynced.value = syncStatus.value == .synced
-        Log.debug(message: "SyncManager - Sync status changed to: \"\(syncStatus.value)\"")
+        //Log.debug(message: "SyncManager - Sync status changed to: \"\(syncStatus.value)\"")
     }
 }

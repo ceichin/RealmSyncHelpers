@@ -66,6 +66,7 @@ class SyncQuery<T: Object> {
         
         guard isReachable else {
             doNotNotifyAnymore()
+            Log.warning(message: "SyncQuery \"\(self.name)\" failed inmediately because there is no network connection.")
             completion(.noConnection)
             return
         }
@@ -73,6 +74,7 @@ class SyncQuery<T: Object> {
         timer = Timer.scheduledTimer(withTimeInterval: SyncQueryConstants.timeout, repeats: false) { [weak self] _ in
             guard let self = self else { return }
             self.doNotNotifyAnymore()
+            Log.warning(message: "SyncQuery \"\(self.name)\" timed out.")
             completion(.noConnection)
         }
         
@@ -82,12 +84,15 @@ class SyncQuery<T: Object> {
             case .complete:
                 self.doNotNotifyAnymore()
                 if self.isReachable {
+                    Log.debug(message: "SyncQuery \"\(self.name)\" synced successfully.")
                     completion(.synced(results: self.query))
                 } else {
+                    Log.warning(message: "SyncQuery \"\(self.name)\" failed because there is no network connection after completion.")
                     completion(.noConnection)
                 }
             case .error(let error):
                 self.doNotNotifyAnymore()
+                Log.warning(message: "SyncQuery \"\(self.name)\" failed because of error: \(error.localizedDescription).")
                 completion(.failed(error: .unknown(message: error.localizedDescription)))
             case .creating, .invalidated, .pending:
                 break
@@ -99,7 +104,9 @@ class SyncQuery<T: Object> {
             switch status {
             case .reachable: break
             default:
+                if status == .unknown, self.isReachable { return }
                 self.doNotNotifyAnymore()
+                Log.warning(message: "SyncQuery \"\(self.name)\" failed because there was a network connection cut.")
                 completion(.noConnection)
             }
         })
